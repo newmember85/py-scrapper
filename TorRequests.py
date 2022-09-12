@@ -77,7 +77,7 @@ def run_instagram_lockup(user_name):
             querystring = {"username": user_name}
 
             headers = {
-                "X-RapidAPI-Key": API_K.API_KEY_SERVICE ,
+                "X-RapidAPI-Key": API_K.API_KEY_SERVICE,
                 "X-RapidAPI-Host": f"({apis}".split("://")[1].split("m/")[0] + "m)"
             }
             if "instagram188" in apis:
@@ -90,7 +90,7 @@ def run_instagram_lockup(user_name):
                 continue
             api_result = json.loads(response.text)
             if api_result.get("status") == "Success" or api_result.get("success") is True:
-                print(f"The Username: {user_name} was found!!")
+                print(f"The Username: {user_name} was found!!\nURL: https://www.instagram.com/{user_name}/")
                 if api_result.get("success") is True:
                     check_biography_for_email(api_result)
                     check_biography_for_external_url(api_result)
@@ -105,24 +105,26 @@ def check_biography_for_email(script):
     biography = script.get("data").get("biography")
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     wordlist = biography.split()
-    [email] = [email for email in wordlist if "@" in email] or "N Email was found"
-    if re.fullmatch(regex, email):
-        print(f"Valid Email was found: {email}")
-
+    [email] = [email for email in wordlist if "@" in email] or ["N0 Email was found"]
+    if email == "N0 Email was found":
+        print(email)
     else:
-        print("Invalid Email")
+        if re.fullmatch(regex, email):
+            print(f"Valid Email was found: {email}")
+
+        else:
+            print("Invalid Email")
 
 
 def check_biography_for_external_url(script):
     url = script.get("data").get("external_url")
-    if "http" in url:
-        print(f"External URL was found {url}")
-    else:
+    if url is None:
         print("No URL was found")
+    elif "http" in url:
+        print(f"External URL was found {url}")
+
 
 
 if __name__ == '__main__':
-    # run_instagram_lockup()
-    # run_twitter_demo()
-    pass
-
+    run_instagram_lockup("maxi_q1")
+    # # run_twitter_demo()

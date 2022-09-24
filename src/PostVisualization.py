@@ -2,16 +2,15 @@ import json
 import os
 import folium
 import webbrowser
-import time
-from Instagram import create_tor_request as torrequest, InstagramSearch
+from src.Instagram import create_tor_request as torrequest, InstagramSearch
 from bs4 import BeautifulSoup
 from datetime import *
 
 
-def test_load():
-    with open("test_result.json", "r", encoding="utf-8") as f:
-        result = json.load(f)
-    return result.get("data").get("edge_owner_to_timeline_media").get("edges")
+# def test_load():
+#     with open("test_result.json", "r", encoding="utf-8") as f:
+#         result = json.load(f)
+#     return result.get("data").get("edge_owner_to_timeline_media").get("edges")
 
 
 # Returns Lat and Long from given Location ID
@@ -53,8 +52,8 @@ def folium_world_map(locations, file_path):
             folium.Marker(coordinates,
                           popup=f"Location:{coordinates}" + '<br>' + f'Name:{location_name}' + '<br>' + f'Date:{date.fromtimestamp(taken_at_timestamp).strftime("%d.%m.Y")}').add_to(
                 world_map)
-            world_map.save(f"./data/{file_path}/post_map.html")
-            webbrowser.open(f"./data/{file_path}/post_map.html")
+            world_map.save(f"../data/{file_path}/post_map.html")
+            webbrowser.open('file://' + os.path.realpath(f'../data/{file_path}/post_map.html'))
 
 
 class PostVisualisation(InstagramSearch):
@@ -64,10 +63,10 @@ class PostVisualisation(InstagramSearch):
 
     # Reads the User Information from the json File
     def access_user_info_file(self):
-        [json_file] = [file for file in os.listdir(f'./data/{self.user_name}') if
+        [json_file] = [file for file in os.listdir(f'../data/{self.user_name}') if
                        file.startswith(f"{self.user_name}")] or ["None"]
         try:
-            with open(f'./data/{self.user_name}/{json_file}', "r", encoding="utf-8") as f:
+            with open(f'../data/{self.user_name}/{json_file}', "r", encoding="utf-8") as f:
                 result = json.load(f)
         except FileNotFoundError as e:
             print(e)
@@ -77,19 +76,22 @@ class PostVisualisation(InstagramSearch):
 
     def save_user_post_geolocation_file(self, data):
         try:
-            file_path = fr'./data/{self.user_name}/{self.user_name}-geolocation.json'
+            file_path = fr'../data/{self.user_name}/{self.user_name}-geolocation.json'
             # create file
             with open(file_path, 'w') as fp:
                 json.dump(data, fp)
         except Exception as e:
             print(f'File already exists: {e}')
 
+    def open_map_file(self):
+        webbrowser.open(f"../data/{self.user_name}/post_map.html", new=2)
+
     def create_user_map(self):
         user_data = self.access_user_info_file()
         locations = get_post_location(user_data)
         self.save_user_post_geolocation_file(locations)
 
-        with open(fr"./data/{self.user_name}/{self.user_name}-geolocation.json", "r", encoding="utf-8") as fr:
+        with open(fr"../data/{self.user_name}/{self.user_name}-geolocation.json", "r", encoding="utf-8") as fr:
             r = json.load(fr)
 
         folium_world_map(r, file_path=self.user_name)
@@ -98,5 +100,6 @@ class PostVisualisation(InstagramSearch):
 if __name__ == '__main__':
     # Returns from the Result all Locations
 
-    user_visu = PostVisualisation("philipp_blanz")
+    user_visu = PostVisualisation("basostream")
     user_visu.create_user_map()
+

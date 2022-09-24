@@ -15,21 +15,19 @@ from datetime import datetime
 
 # Updates the JSON File for every Call in Function "run_instagram_lockup"
 def update_instagram_calls(api_type):
-    with open("API_CALLS.json", "r", encoding="utf-8") as df:
+    with open("../JsonFiles/API_CALLS.json", "r", encoding="utf-8") as df:
         data = json.load(df)
 
-    with open("API_CALLS.json", "w", encoding="utf-8") as file:
+    with open("../JsonFiles/API_CALLS.json", "w", encoding="utf-8") as file:
         data[f"Instagram{api_type}"]["Calls"] += 1
         json.dump(data, file)
 
 
 # Picks random user_agent String from JSON FILE user_agents.json
 def get_random_user_agent():
-    data_folder = Path(os.getcwd())
-    file_path = data_folder / "user_agents.json"
-    if os.path.exists(file_path):
+    if os.path.exists("../JsonFiles/user_agents.json"):
         print("Random User-Agent will be picked")
-        with open("user_agents.json", "r", encoding="utf-8") as f:
+        with open("../JsonFiles/user_agents.json", "r", encoding="utf-8") as f:
             result = json.load(f)
 
         user_agent = random.choice(result)["useragent"]
@@ -68,7 +66,8 @@ def tor_proxy():
 
 # Create Request with given URL
 def create_tor_request(url):
-    result = requests.get(url, proxies=tor_proxy(), headers=create_session_header())
+    #, , proxies=tor_proxy()
+    result = requests.get(url, headers=create_session_header())
     result.cookies.clear()
     return result
 
@@ -172,21 +171,20 @@ class InstagramSearch:
             "X-RapidAPI-Host": "instagram188.p.rapidapi.com"
         }
 
-        response = requests.request("GET", url, headers=headers, proxies=tor_proxy())
+        response = requests.request("GET", url, headers=headers)
         time.sleep(2)
         if response.status_code == 200:
             update_instagram_calls(headers["X-RapidAPI-Host"][9:12])
             with open(
-                    f"./data/{self.user_name}/{self.user_name}-user-information-{datetime.now().strftime('%d.%m.%Y')}.json",
+                    f"../data/{self.user_name}/{self.user_name}-user-information-{datetime.now().strftime('%d.%m.%Y')}.json",
                     "w", encoding="utf-8") as file:
                 json.dump(response.json(), file)
 
     def test_proxy(self):
-        result = requests.get("https://httpbin.org/get", proxies=tor_proxy())
-        print(result)
+        result = requests.get("https://httpbin.org/get", headers=create_session_header())
+        print(result.text)
 
 
 if __name__ == '__main__':
     instagram = InstagramSearch("basostream")
-    # instagram.get_user_name_information()
-    instagram.test_proxy()
+    instagram.get_user_name_information()
